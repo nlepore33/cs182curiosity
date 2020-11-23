@@ -9,6 +9,13 @@ import numpy as np
 from ppo import PPO
 from icm import ICM
 
+# Settings
+env_name = 'MountainCarContinuous-v0'
+render = False
+load_model = False
+load_model_filename = 'PPO_ICM_MountainCarContinuous-v0_1000.pth'
+use_icm = True
+
 # Hyperparameters
 learning_rate  = 0.0003 # 0.0003
 gamma          = 0.9 # 0.9
@@ -28,7 +35,7 @@ forward_hidden_sizes = [128,128,]
 β = 0.5
 
 def main():
-    env = gym.make('MountainCarContinuous-v0')
+    env = gym.make(env_name)
     model = PPO(
         env.observation_space.shape[0],
         env.action_space.shape[0],
@@ -40,10 +47,16 @@ def main():
         buffer_size = buffer_size,
         minibatch_size = minibatch_size,
         policy_weight = policy_weight,
+        use_icm = use_icm,
         icm_parameters = (feature_hidden_sizes, feature_size, inverse_hidden_sizes, forward_hidden_sizes, β)
     )
+
+    if load_model:
+        model.load_state_dict(torch.load('./saved_models/' + load_model_filename))
+
     score = 0.0
     print_interval = 10
+    save_interval = 100
     rollout = []
 
     for n_epi in range(10000):
@@ -56,6 +69,9 @@ def main():
                 a = dist.sample()
                 log_prob = dist.log_prob(a)
                 s_prime, r, done, info = env.step(a)
+                
+                if render:
+                    env.render()
 
                 rollout.append((s, a, r/10.0, s_prime, log_prob, done))
                 if len(rollout) == rollout_len:
@@ -72,6 +88,12 @@ def main():
         if n_epi%print_interval==0 and n_epi!=0:
             print("# of episode :{}, avg score : {:.1f}, opt step: {}".format(n_epi, score/print_interval, model.optimization_step))
             score = 0.0
+
+        if n_epi%save_interval==0 and n_epi!=0:
+            if use_icm:
+                torch.save(model.state_dict(), './saved_models/PPO_ICM_{}_{}.pth'.format(env_name, n_epi))
+            else:
+                torch.save(model.state_dict(), './saved_models/PPO_{}_{}.pth'.format(env_name, n_epi))
 
     env.close()
 

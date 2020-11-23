@@ -8,7 +8,7 @@ import numpy as np
 from icm import ICM
 
 class PPO(nn.Module):
-    def __init__(self, state_size, action_size, learning_rate, gamma, lmbda, eps_clip, K_epoch, buffer_size, minibatch_size, policy_weight, icm_parameters):
+    def __init__(self, state_size, action_size, learning_rate, gamma, lmbda, eps_clip, K_epoch, buffer_size, minibatch_size, policy_weight, use_icm, icm_parameters):
         super(PPO, self).__init__()
         self.data = []
         
@@ -26,8 +26,10 @@ class PPO(nn.Module):
         self.buffer_size = buffer_size
         self.minibatch_size = minibatch_size
         self.policy_weight = policy_weight
+        self.use_icm = use_icm
         
-        self.icm = ICM(state_size, action_size, icm_parameters)
+        if use_icm:
+            self.icm = ICM(state_size, action_size, icm_parameters)
 
     def pi(self, x, softmax_dim = 0):
         x = F.relu(self.fc1(x))
@@ -119,17 +121,20 @@ class PPO(nn.Module):
 
                     surr1 = ratio * advantage
                     surr2 = torch.clamp(ratio, 1-self.eps_clip, 1+self.eps_clip) * advantage
-                    
-                    a_hat, s_hat = self.icm.predict(s, a, s_prime)
-#                     print('a_hat', a_hat)
-#                     print('s_hat', s_hat)
-#                     print(self.icm.loss(s, a, a_hat, s_prime, s_hat))
-#                     print(-torch.min(surr1, surr2) + F.smooth_l1_loss(self.v(s) , td_target))
-                    
-                    policy_loss = -torch.min(surr1, surr2) + F.smooth_l1_loss(self.v(s) , td_target)
-                    intrinsic_loss = self.icm.loss(s, a, a_hat, s_prime, s_hat)
-                    loss = self.policy_weight * policy_loss + intrinsic_loss
 
+                    policy_loss = -torch.min(surr1, surr2) + F.smooth_l1_loss(self.v(s) , td_target)
+                    
+                    if self.use_icm:
+                        a_hat, s_hat = self.icm.predict(s, a, s_prime)
+                        intrinsic_loss = self.icm.loss(s, a, a_hat, s_prime, s_hat)
+                        loss = self.policy_weight * policy_loss + (1-self.policy_weight) * intrinsic_loss
+                    else:
+                        loss = policy_loss
+
+                    # print(policy_loss)
+                    # print(intrinsic_loss)
+                    # print(loss)
+                    
                     self.optimizer.zero_grad()
                     loss.mean().backward()
                     nn.utils.clip_grad_norm_(self.parameters(), 1.0)
