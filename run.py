@@ -26,7 +26,7 @@ K_epoch        = 10
 rollout_len    = 3
 buffer_size    = 30
 minibatch_size = 32
-policy_weight = 1.0
+policy_weight = 0.01
 max_episodes = 300
 
 # ICM parameters
@@ -34,7 +34,7 @@ feature_hidden_sizes = [128,128,]
 feature_size = 8
 inverse_hidden_sizes = [128,128,]
 forward_hidden_sizes = [128,128,]
-β = 1.0
+β = 0.5
 
 def main():
     env = gym.make(env_name)
