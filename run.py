@@ -26,7 +26,7 @@ K_epoch        = 10
 rollout_len    = 3
 buffer_size    = 30
 minibatch_size = 32
-policy_weight = 0.01
+policy_weight = 1.0
 max_episodes = 300
 
 # ICM parameters
