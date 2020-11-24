@@ -4,9 +4,7 @@ import matplotlib.pyplot as plt
 runs = [
     'PPO_ICM_MountainCarContinuous-v0_-37.07607583799019.npy',
     'PPO_ICM_MountainCarContinuous-v0_-46.06291450960883_0.75_0.2.npy',
-    # 'PPO_ICM_MountainCarContinuous-v0_-53.10911658906612_1.0_0.2.npy',
     'PPO_ICM_MountainCarContinuous-v0_-53.624374026419844_1.0_0.2.npy',
-    # 'PPO_ICM_MountainCarContinuous-v0_-62.91433313853694_0.75_0.2.npy',
     'PPO_ICM_MountainCarContinuous-v0_-97.24413804480204.npy',
     'PPO_MountainCarContinuous-v0_-71.65956278338766.npy',
     'PPO_MountainCarContinuous-v0_-74.31046497716287.npy',
