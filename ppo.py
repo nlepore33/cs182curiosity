@@ -3,9 +3,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.distributions import Normal
-import numpy as np
 
 from icm import ICM
+
+torch.manual_seed(182)
 
 class PPO(nn.Module):
     def __init__(self, state_size, action_size, learning_rate, gamma, lmbda, eps_clip, K_epoch, buffer_size, minibatch_size, policy_weight, use_icm, icm_parameters):
@@ -127,13 +128,9 @@ class PPO(nn.Module):
                     if self.use_icm:
                         a_hat, s_hat = self.icm.predict(s, a, s_prime)
                         intrinsic_loss = self.icm.loss(s, a, a_hat, s_prime, s_hat)
-                        loss = self.policy_weight * policy_loss + (1-self.policy_weight) * intrinsic_loss
+                        loss = self.policy_weight * policy_loss + intrinsic_loss
                     else:
                         loss = policy_loss
-
-                    # print(policy_loss)
-                    # print(intrinsic_loss)
-                    # print(loss)
                     
                     self.optimizer.zero_grad()
                     loss.mean().backward()

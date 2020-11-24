@@ -3,7 +3,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.distributions import Normal
-import numpy as np
+
+torch.manual_seed(182)
 
 class ICM(nn.Module):
     def __init__(self, state_size, action_size, icm_parameters):
