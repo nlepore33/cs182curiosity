@@ -13,11 +13,11 @@ from icm import ICM
 env_name = 'MountainCarContinuous-v0'
 render = False
 load_model = False
-load_model_filename = 'PPO_ICM_MountainCarContinuous-v0_1000.pth'
-use_icm = True
+load_model_filename = 'PPO_MountainCarContinuous-v0_5300.pth'
+use_icm = False
 
 # Hyperparameters
-learning_rate  = 0.0003 # 0.0003
+learning_rate  = 0.002 # 0.0003
 gamma          = 0.9 # 0.9
 lmbda          = 0.9 # 0.9
 eps_clip       = 0.2  # 0.2
@@ -25,7 +25,7 @@ K_epoch        = 10
 rollout_len    = 3
 buffer_size    = 30
 minibatch_size = 32
-policy_weight = 1.0
+policy_weight = 0.75
 
 # ICM parameters
 feature_hidden_sizes = [128,128,]
