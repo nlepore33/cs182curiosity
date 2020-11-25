@@ -41,7 +41,7 @@ def main():
     env.seed(env_seed)
     env.action_space.seed(env_seed)
     # if render:
-    #     env = gym.wrappers.Monitor(env, './video/', video_callable=False, force = True)
+    #     env = gym.wrappers.Monitor(env, './video_stats/', video_callable=False, force = True)
     model = PPO(
         env.observation_space.shape[0],
         env.action_space.shape[0],
