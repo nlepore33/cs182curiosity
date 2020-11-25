@@ -11,10 +11,10 @@ from icm import ICM
 
 # Settings
 env_name = 'MountainCarContinuous-v0'
-render = True
-load_model = True
+render = False
+load_model = False
 load_model_filename = 'PPO_MountainCarContinuous-v0_5000.pth'
-use_icm = False
+use_icm = True
 env_seed = 182
 
 # Hyperparameters
