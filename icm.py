@@ -52,8 +52,24 @@ class ICM(nn.Module):
         s_hat = self.forward_net(cat2)
         return a_hat, s_hat
 
+    def predict_once(self, s, a, s_prime):
+        s = torch.from_numpy(s).float()
+        # a = torch.from_numpy(a)
+        s_prime = torch.from_numpy(s_prime).float()
+        cat1 = torch.cat([self.feature_net(s), self.feature_net(s_prime)])
+        cat2 = torch.cat([self.feature_net(s).clone().detach(), a])
+        a_hat = self.inverse_net(cat1)
+        s_hat = self.forward_net(cat2)
+        return a_hat, s_hat
+
     def loss(self, s, a, a_hat, s_prime, s_hat):
         L_I = self.L_I(a_hat, a.view(-1,self.action_size))
         L_F = self.L_F(s_hat, self.feature_net(s_prime.view(-1,self.state_size)).clone().detach())
+        return (1 - self.β) * L_I + self.β * L_F
+
+    def loss_once(self, s, a, a_hat, s_prime, s_hat):
+        s_prime = torch.from_numpy(s_prime).float()
+        L_I = self.L_I(a_hat, a)
+        L_F = self.L_F(s_hat, self.feature_net(s_prime).clone().detach())
         return (1 - self.β) * L_I + self.β * L_F
             
