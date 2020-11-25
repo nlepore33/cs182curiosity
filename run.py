@@ -11,10 +11,10 @@ from icm import ICM
 
 # Settings
 env_name = 'MountainCarContinuous-v0'
-render = False
-load_model = False
-load_model_filename = 'PPO_MountainCarContinuous-v0_5300.pth'
-use_icm = True
+render = True
+load_model = True
+load_model_filename = 'PPO_MountainCarContinuous-v0_5000.pth'
+use_icm = False
 env_seed = 182
 
 # Hyperparameters
@@ -40,6 +40,8 @@ def main():
     env = gym.make(env_name)
     env.seed(env_seed)
     env.action_space.seed(env_seed)
+    # if render:
+    #     env = gym.wrappers.Monitor(env, './video/', video_callable=False, force = True)
     model = PPO(
         env.observation_space.shape[0],
         env.action_space.shape[0],
@@ -81,6 +83,7 @@ def main():
                 
                 if render:
                     env.render()
+                    # env = gym.wrappers.Monitor(env, './video/', video_callable=lambda episode_id: True, force = True)
 
                 rollout.append((s, a, r/10.0, s_prime, log_prob, done))
                 if len(rollout) == rollout_len:
