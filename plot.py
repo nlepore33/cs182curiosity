@@ -1,6 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+# --------------------------------------------------------------------------
+
+# Plots  for PPO vs. PPO with ICM
+
 runs = [
     'PPO_ICM_MountainCarContinuous-v0_-37.07607583799019.npy',
     'PPO_ICM_MountainCarContinuous-v0_-46.06291450960883_0.75_0.2.npy',
@@ -31,15 +35,19 @@ for run in loop_runs:
         label='PPO'
         ppo_count += 1
     if ppo_count == 1 or ppo_icm_count == 1:
-        plt.plot(np.arange(len(y)), y, color, label=label)
+        plt.plot(np.arange(len(y)) * 10, y, color, label=label)
     else:
-        plt.plot(np.arange(len(y)), y, color)
-plt.xlabel('Episode (x10)')
+        plt.plot(np.arange(len(y)) * 10, y, color)
+plt.xlabel('Episode')
 plt.ylabel('Average Reward')
 plt.title('MountainCarContinuous Score')
 plt.legend()
 plt.savefig(savefile)
 plt.show()
+
+# --------------------------------------------------------------------------
+
+# Plots for PPO vs. PPO with ICM with seed set
 
 seed_runs = [
     'PPO_ICM_MountainCarContinuous-v0_-53.10911658906612_1.0_0.5.npy',
@@ -54,15 +62,19 @@ for run in loop_runs:
     y = np.load(directory+run)
     y = y[:plot_range]
     if run.startswith('PPO_ICM'):
-        plt.plot(np.arange(len(y)), y, label='PPO_ICM')
+        plt.plot(np.arange(len(y)) * 10, y, label='PPO_ICM')
     else:
-        plt.plot(np.arange(len(y)), y, label='PPO')
-plt.xlabel('Episode (x10)')
+        plt.plot(np.arange(len(y)) * 10, y, label='PPO')
+plt.xlabel('Episode')
 plt.ylabel('Average Reward')
 plt.title('MountainCarContinuous Score (Seeded)')
 plt.legend()
 plt.savefig(savefile)
 plt.show()
+
+# --------------------------------------------------------------------------
+
+# PPO with ICM for varying β
 
 seed_runs = [
     'PPO_ICM_MountainCarContinuous-v0_-53.10911658906612_1.0_0.0.npy',
@@ -82,13 +94,17 @@ beta = [0.0, 0.1, 0.2, 0.5, 0.75, 0.9, 1.0]
 for i, run in enumerate(loop_runs):
     y = np.load(directory+run)
     y = y[:plot_range]
-    plt.plot(np.arange(len(y)), y, label='β='+str(beta[i]))
-plt.xlabel('Episode (x10)')
+    plt.plot(np.arange(len(y)) * 10, y, label='β='+str(beta[i]))
+plt.xlabel('Episode')
 plt.ylabel('Average Reward')
 plt.title('MountainCarContinuous Score, Vary β (Seeded, λ=1.0)')
 plt.legend()
 plt.savefig(savefile)
 plt.show()
+
+# --------------------------------------------------------------------------
+
+# PPO with ICM for varying λ
 
 seed_runs = [
     'PPO_ICM_MountainCarContinuous-v0_-50.71670728565125_0.0_0.5.npy',
@@ -106,8 +122,8 @@ lmbda = [0.0, 0.01, 0.1, 0.5, 1.0]
 for i, run in enumerate(loop_runs):
     y = np.load(directory+run)
     y = y[:plot_range]
-    plt.plot(np.arange(len(y)), y, label='λ='+str(lmbda[i]), alpha=0.7)
-plt.xlabel('Episode (x10)')
+    plt.plot(np.arange(len(y)) * 10, y, label='λ='+str(lmbda[i]), alpha=0.7)
+plt.xlabel('Episode')
 plt.ylabel('Average Reward')
 plt.title('MountainCarContinuous Score, Vary λ (Seeded, β=0.5)')
 plt.legend()

@@ -33,6 +33,7 @@ class PPO(nn.Module):
             self.icm = ICM(state_size, action_size, icm_parameters)
 
     def pi(self, x, softmax_dim = 0):
+        '''Calculate mu and std for given state.'''
         x = F.relu(self.fc1(x))
         mu = 2.0*torch.tanh(self.fc_mu(x))
         std = F.softplus(self.fc_std(x))
@@ -44,9 +45,11 @@ class PPO(nn.Module):
         return v
       
     def put_data(self, transition):
+        '''Adds rollout to running list of data.'''
         self.data.append(transition)
         
     def make_batch(self):
+        '''Used to create training batch.'''
         s_batch, a_batch, r_batch, s_prime_batch, prob_a_batch, done_batch = [], [], [], [], [], []
         data = []
 
@@ -86,6 +89,7 @@ class PPO(nn.Module):
         return data
 
     def calc_advantage(self, data):
+        '''Calculates PPO as specified by the algorithm.'''
         data_with_adv = []
         for mini_batch in data:
             s, a, r, s_prime, done_mask, old_log_prob = mini_batch
@@ -107,6 +111,7 @@ class PPO(nn.Module):
 
         
     def train_net(self):
+        '''One iteration of training the PPO.'''
         if len(self.data) == self.minibatch_size * self.buffer_size:
             mini_batch = self.make_batch()
             mini_batch = self.calc_advantage(mini_batch)
@@ -123,11 +128,14 @@ class PPO(nn.Module):
 
             policy_loss = -torch.min(surr1, surr2) + F.smooth_l1_loss(self.v(s) , td_target)
             
+
             if self.use_icm:
+                # Include ICM loss
                 a_hat, s_hat = self.icm.predict(s, a, s_prime)
                 intrinsic_loss = self.icm.loss(s, a, a_hat, s_prime, s_hat)
                 loss = self.policy_weight * policy_loss + intrinsic_loss
             else:
+                # Otherwise, use normal PPO loss
                 loss = policy_loss
             
             self.optimizer.zero_grad()

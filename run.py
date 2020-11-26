@@ -37,9 +37,12 @@ forward_hidden_sizes = [128,128,]
 β = 0.5
 
 def main():
+    # Create gym environment
     env = gym.make(env_name)
     env.seed(env_seed)
     env.action_space.seed(env_seed)
+
+    # Model initialization
     model = PPO(
         env.observation_space.shape[0],
         env.action_space.shape[0],
@@ -58,6 +61,7 @@ def main():
     if load_model:
         model.load_state_dict(torch.load('./saved_models/' + load_model_filename))
 
+    # Auxiliary parameters
     score = 0.0
     print_interval = 10
     save_interval = 100
@@ -94,6 +98,7 @@ def main():
 
             model.train_net()
 
+        # Record score
         if n_epi%print_interval==0 and n_epi!=0:
             avg_score = score/print_interval
             avg_scores.append(avg_score)
@@ -103,6 +108,7 @@ def main():
                 first_time = False
                 first_avg_score = avg_score
 
+        # Save model
         if n_epi%save_interval==0 and n_epi!=0:
             if use_icm:
                 torch.save(model.state_dict(), './saved_models/PPO_ICM_{}_{}.pth'.format(env_name, n_epi))
@@ -111,6 +117,7 @@ def main():
 
     env.close()
 
+    # Save model results
     if use_icm:
         np.save('./results_seeded/PPO_ICM_{}_{}_{}_{}'.format(env_name, first_avg_score, policy_weight, β), np.array(avg_scores))
     else:
