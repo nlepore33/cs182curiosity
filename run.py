@@ -40,8 +40,6 @@ def main():
     env = gym.make(env_name)
     env.seed(env_seed)
     env.action_space.seed(env_seed)
-    # if render:
-    #     env = gym.wrappers.Monitor(env, './video_stats/', video_callable=False, force = True)
     model = PPO(
         env.observation_space.shape[0],
         env.action_space.shape[0],
@@ -83,8 +81,7 @@ def main():
                 
                 if render:
                     env.render()
-                    # env = gym.wrappers.Monitor(env, './video/', video_callable=lambda episode_id: True, force = True)
-
+                    
                 rollout.append((s, a, r/10.0, s_prime, log_prob, done))
                 if len(rollout) == rollout_len:
                     model.put_data(rollout)
