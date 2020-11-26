@@ -108,33 +108,31 @@ class PPO(nn.Module):
         
     def train_net(self):
         if len(self.data) == self.minibatch_size * self.buffer_size:
-            data = self.make_batch()
-            data = self.calc_advantage(data)
+            mini_batch = self.make_batch()
+            mini_batch = self.calc_advantage(mini_batch)
 
-            for i in range(self.K_epoch):
-                for mini_batch in data:
-                    s, a, r, s_prime, done_mask, old_log_prob, td_target, advantage = mini_batch
+            s, a, r, s_prime, done_mask, old_log_prob, td_target, advantage = mini_batch[0]
 
-                    mu, std = self.pi(s, softmax_dim=1)
-                    dist = Normal(mu, std)
-                    log_prob = dist.log_prob(a)
-                    ratio = torch.exp(log_prob - old_log_prob)  # a/b == exp(log(a)-log(b))
+            mu, std = self.pi(s, softmax_dim=1)
+            dist = Normal(mu, std)
+            log_prob = dist.log_prob(a)
+            ratio = torch.exp(log_prob - old_log_prob)  # a/b == exp(log(a)-log(b))
 
-                    surr1 = ratio * advantage
-                    surr2 = torch.clamp(ratio, 1-self.eps_clip, 1+self.eps_clip) * advantage
+            surr1 = ratio * advantage
+            surr2 = torch.clamp(ratio, 1-self.eps_clip, 1+self.eps_clip) * advantage
 
-                    policy_loss = -torch.min(surr1, surr2) + F.smooth_l1_loss(self.v(s) , td_target)
-                    
-                    if self.use_icm:
-                        a_hat, s_hat = self.icm.predict(s, a, s_prime)
-                        intrinsic_loss = self.icm.loss(s, a, a_hat, s_prime, s_hat)
-                        loss = self.policy_weight * policy_loss + intrinsic_loss
-                    else:
-                        loss = policy_loss
-                    
-                    self.optimizer.zero_grad()
-                    loss.mean().backward()
-                    nn.utils.clip_grad_norm_(self.parameters(), 1.0)
-                    self.optimizer.step()
-                    self.optimization_step += 1
-                    return loss
+            policy_loss = -torch.min(surr1, surr2) + F.smooth_l1_loss(self.v(s) , td_target)
+            
+            if self.use_icm:
+                a_hat, s_hat = self.icm.predict(s, a, s_prime)
+                intrinsic_loss = self.icm.loss(s, a, a_hat, s_prime, s_hat)
+                loss = self.policy_weight * policy_loss + intrinsic_loss
+            else:
+                loss = policy_loss
+            
+            self.optimizer.zero_grad()
+            loss.mean().backward()
+            nn.utils.clip_grad_norm_(self.parameters(), 1.0)
+            self.optimizer.step()
+            self.optimization_step += 1
+            return loss
