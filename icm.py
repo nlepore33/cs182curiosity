@@ -4,6 +4,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.distributions import Normal
 
+# Set seed
 torch.manual_seed(182)
 
 class ICM(nn.Module):

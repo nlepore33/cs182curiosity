@@ -18,10 +18,10 @@ use_icm = True
 env_seed = 182
 
 # Hyperparameters
-learning_rate  = 0.002 # 0.0003
-gamma          = 0.9 # 0.9
-lmbda          = 0.9 # 0.9
-eps_clip       = 0.2  # 0.2
+learning_rate  = 0.002
+gamma          = 0.9
+lmbda          = 0.9
+eps_clip       = 0.2 
 K_epoch        = 10
 rollout_len    = 3
 buffer_size    = 30
@@ -39,6 +39,8 @@ forward_hidden_sizes = [128,128,]
 def main():
     # Create gym environment
     env = gym.make(env_name)
+
+    # Set seed for reproducibility
     env.seed(env_seed)
     env.action_space.seed(env_seed)
 
@@ -58,6 +60,7 @@ def main():
         icm_parameters = (feature_hidden_sizes, feature_size, inverse_hidden_sizes, forward_hidden_sizes, β)
     )
 
+    # For loading previous models
     if load_model:
         model.load_state_dict(torch.load('./saved_models/' + load_model_filename))
 
@@ -70,6 +73,7 @@ def main():
     first_time = True
     first_avg_score = 0
 
+    # Train over episodes
     for n_epi in range(max_episodes):
         s = env.reset()
         env.seed(env_seed)
@@ -77,6 +81,7 @@ def main():
         done = False
         while not done:
             for t in range(rollout_len):
+                # Distribution to select action
                 mu, std = model.pi(torch.from_numpy(s).float())
                 dist = Normal(mu, std)
                 a = dist.sample()
@@ -85,7 +90,8 @@ def main():
                 
                 if render:
                     env.render()
-                    
+                
+                # Appending to training data
                 rollout.append((s, a, r/10.0, s_prime, log_prob, done))
                 if len(rollout) == rollout_len:
                     model.put_data(rollout)
@@ -96,6 +102,7 @@ def main():
                 if done:
                     break
 
+            # Train model
             model.train_net()
 
         # Record score
@@ -108,7 +115,7 @@ def main():
                 first_time = False
                 first_avg_score = avg_score
 
-        # Save model
+        # Save model itself
         if n_epi%save_interval==0 and n_epi!=0:
             if use_icm:
                 torch.save(model.state_dict(), './saved_models/PPO_ICM_{}_{}.pth'.format(env_name, n_epi))

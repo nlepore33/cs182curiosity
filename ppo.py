@@ -6,6 +6,7 @@ from torch.distributions import Normal
 
 from icm import ICM
 
+# Set seed
 torch.manual_seed(182)
 
 class PPO(nn.Module):
@@ -13,6 +14,7 @@ class PPO(nn.Module):
         super(PPO, self).__init__()
         self.data = []
         
+        # PPO neural network architecture
         self.fc1   = nn.Linear(state_size,128)
         self.fc_mu = nn.Linear(128,action_size)
         self.fc_std  = nn.Linear(128,action_size)
@@ -20,6 +22,7 @@ class PPO(nn.Module):
         self.optimizer = optim.Adam(self.parameters(), lr=learning_rate)
         self.optimization_step = 0
 
+        # Parameters
         self.gamma = gamma
         self.lmbda = lmbda
         self.eps_clip = eps_clip
